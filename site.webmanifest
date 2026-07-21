@@ -1,0 +1,9 @@
+{
+  "name": "SnapAccounts",
+  "short_name": "SnapAccounts",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f7fc",
+  "theme_color": "#6c5ce7",
+  "icons": [{"src":"assets/app-icon.png","sizes":"1024x1024","type":"image/png"}]
+}
