@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pollaio in Sicilia — Calcolatore di redditività</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --terra: #A6432E;
+    --terra-dark: #7A2F20;
+    --olive: #5B6B3A;
+    --olive-dark: #3E4A27;
+    --ochre: #C98A3E;
+    --ochre-light: #E8C892;
+    --cream: #F2EAD8;
+    --cream-soft: #FBF7EE;
+    --soil: #3A2E22;
+    --soil-soft: #6B5C4A;
+    --line: #DCD0B4;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--soil);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 2px solid var(--soil);
+    position: relative;
+  }
+
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--terra);
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 40px;
+    margin: 0 0 0.5rem;
+    color: var(--soil);
+  }
+
+  header p {
+    color: var(--soil-soft);
+    font-size: 15px;
+    margin: 0;
+    max-width: 520px;
+  }
+
+  .hero-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 64px;
+    height: 64px;
+    opacity: 0.9;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--soil);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+  }
+
+  .metric {
+    background: var(--cream-soft);
+    padding: 1.25rem 1.1rem;
+  }
+
+  .metric.highlight {
+    background: var(--olive);
+  }
+
+  .metric.highlight .metric-label,
+  .metric.highlight .metric-value {
+    color: var(--cream-soft);
+  }
+
+  .metric-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--soil-soft);
+    margin: 0 0 6px;
+    font-weight: 600;
+  }
+
+  .metric-value {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin: 0;
+    color: var(--soil);
+  }
+
+  .panel {
+    background: var(--cream-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .panel h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 1.4rem;
+    color: var(--terra-dark);
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 2rem;
+  }
+
+  .control-row label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--soil-soft);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .control-row output {
+    color: var(--terra);
+    font-weight: 600;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--terra);
+    cursor: pointer;
+    border: 2px solid var(--cream-soft);
+    box-shadow: 0 0 0 1px var(--terra);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--terra);
+    cursor: pointer;
+    border: 2px solid var(--cream-soft);
+  }
+
+  table.breakdown {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  table.breakdown td {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  table.breakdown tr:last-child td {
+    border-bottom: none;
+  }
+
+  table.breakdown td:first-child {
+    color: var(--soil-soft);
+  }
+
+  table.breakdown td:last-child {
+    text-align: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cost { color: var(--terra-dark); }
+  .revenue { color: var(--olive-dark); }
+
+  .note {
+    font-size: 13px;
+    color: var(--soil-soft);
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed var(--line);
+  }
+
+  @media (max-width: 640px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .controls { grid-template-columns: 1fr; }
+    h1 { font-size: 30px; }
+    .hero-icon { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Fab Garden &middot; progetto Sicilia</p>
+    <h1>Pollaio in Sicilia</h1>
+    <p>Stima la redditività mensile di un allevamento di galline ovaiole a terra, a partire dalla superficie del tuo terreno.</p>
+    <svg class="hero-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="32" cy="36" rx="16" ry="20" fill="#F2EAD8" stroke="#3A2E22" stroke-width="2"/>
+      <path d="M20 22 Q24 10 32 16 Q40 10 44 22" stroke="#A6432E" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+  </header>
+
+  <div class="metrics">
+    <div class="metric">
+      <p class="metric-label">Galline</p>
+      <p class="metric-value" id="out-hens">160</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Uova al mese</p>
+      <p class="metric-value" id="out-eggs">3520</p>
+    </div>
+    <div class="metric highlight">
+      <p class="metric-label">Profitto netto/mese</p>
+      <p class="metric-value" id="out-profit">€0</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Profitto/anno</p>
+      <p class="metric-value" id="out-annual">€0</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Parametri</h2>
+    <div class="controls">
+
+      <div class="control-row">
+        <label for="area">Superficie dedicata <output id="area-out">4.000 m²</output></label>
+        <input type="range" id="area" min="200" max="5000" step="100" value="4000">
+      </div>
+
+      <div class="control-row">
+        <label for="density">Spazio per gallina <output id="density-out">4 m²</output></label>
+        <input type="range" id="density" min="2" max="10" step="0.5" value="4">
+      </div>
+
+      <div class="control-row">
+        <label for="eggsper">Uova per gallina / mese <output id="eggsper-out">22</output></label>
+        <input type="range" id="eggsper" min="14" max="26" step="1" value="22">
+      </div>
+
+      <div class="control-row">
+        <label for="price">Prezzo di vendita / uovo <output id="price-out">€0.42</output></label>
+        <input type="range" id="price" min="0.25" max="0.65" step="0.01" value="0.42">
+      </div>
+
+      <div class="control-row">
+        <label for="feedpct">Mangime acquistato <output id="feedpct-out">50%</output></label>
+        <input type="range" id="feedpct" min="0" max="100" step="5" value="50">
+      </div>
+
+      <div class="control-row">
+        <label for="feedprice">Prezzo mangime €/kg <output id="feedprice-out">€0.45</output></label>
+        <input type="range" id="feedprice" min="0.25" max="0.75" step="0.01" value="0.45">
+      </div>
+
+      <div class="control-row">
+        <label for="packaging">Imballaggio / uovo <output id="packaging-out">€0.05</output></label>
+        <input type="range" id="packaging" min="0" max="0.15" step="0.01" value="0.05">
+      </div>
+
+      <div class="control-row">
+        <label for="fixed">Altri costi fissi / mese <output id="fixed-out">€50</output></label>
+        <input type="range" id="fixed" min="0" max="150" step="5" value="50">
+      </div>
+
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Spese varie</h2>
+    <p style="font-size:13px; color:var(--soil-soft); margin:0 0 1rem;">Aggiungi le spese extra una a una, con una voce e un importo (es. legno, recinzione, attrezzatura).</p>
+    <div style="display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap;">
+      <input type="text" id="expense-name" placeholder="Voce (es. legno)" style="flex:2; min-width:140px; height:40px; border-radius:8px; border:1px solid var(--line); background:var(--cream); padding:0 12px; font-size:14px; color:var(--soil); font-family:'Inter',sans-serif;">
+      <input type="number" id="expense-amount" placeholder="Importo €" min="0" step="1" style="flex:1; min-width:100px; height:40px; border-radius:8px; border:1px solid var(--line); background:var(--cream); padding:0 12px; font-size:14px; color:var(--soil); font-family:'Inter',sans-serif;">
+      <button type="button" id="expense-add" style="height:40px; padding:0 18px; border-radius:8px; border:none; background:var(--terra); color:var(--cream-soft); font-size:14px; font-weight:600; cursor:pointer;">Aggiungi</button>
+    </div>
+    <table class="breakdown" id="expense-list">
+    </table>
+    <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--soil); font-weight:600; font-size:14px;">
+      <span>Totale spese varie</span>
+      <span id="extra-out">€0</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Conto economico mensile</h2>
+    <table class="breakdown">
+      <tr><td>Ricavo lordo uova</td><td class="revenue" id="row-revenue">€0</td></tr>
+      <tr><td>Mangime acquistato</td><td class="cost" id="row-feed">-€0</td></tr>
+      <tr><td>Imballaggio</td><td class="cost" id="row-pack">-€0</td></tr>
+      <tr><td>Ammortamento galline</td><td class="cost" id="row-amort">-€0</td></tr>
+      <tr><td>Altri costi</td><td class="cost" id="row-fixed">-€0</td></tr>
+      <tbody id="row-extra-list"></tbody>
+      <tr style="border-top:1.5px solid var(--soil);"><td style="font-weight:600; color:var(--soil);">Totale spese complessive</td><td class="cost" id="row-total-costs" style="font-weight:700;">-€0</td></tr>
+    </table>
+    <p class="note">Stima con densità free-range standard UE (1 gallina ogni 4 m² di spazio esterno = 2500 galline/ettaro), 125 g di mangime al giorno per gallina, galline a €13 l'una ammortizzate su 18 mesi di vita produttiva. Non include il tuo tempo di lavoro. Regola i cursori con i tuoi numeri reali per Sicilia.</p>
+  </div>
+
+</div>
+
+<script>
+const ids = ['area','density','eggsper','price','feedpct','feedprice','packaging','fixed'];
+const els = {};
+ids.forEach(id => els[id] = document.getElementById(id));
+
+let extra = 0;
+let expenses = [];
+const extraOut = document.getElementById('extra-out');
+const expenseList = document.getElementById('expense-list');
+const nameInput = document.getElementById('expense-name');
+const amountInput = document.getElementById('expense-amount');
+
+function renderExpenses() {
+  expenseList.innerHTML = expenses.map((e, i) =>
+    '<tr><td>' + e.name + '</td><td class="cost">-' + fmtE(e.amount) +
+    ' <span data-i="' + i + '" class="expense-remove" style="cursor:pointer; color:var(--soil-soft); margin-left:8px;">&times;</span></td></tr>'
+  ).join('');
+  extra = expenses.reduce((sum, e) => sum + e.amount, 0);
+  extraOut.textContent = fmtE(extra);
+  document.querySelectorAll('.expense-remove').forEach(el => {
+    el.addEventListener('click', () => {
+      expenses.splice(+el.dataset.i, 1);
+      renderExpenses();
+      calc();
+    });
+  });
+}
+
+document.getElementById('expense-add').addEventListener('click', () => {
+  const name = nameInput.value.trim();
+  const amount = +amountInput.value;
+  if (!name || !amount || amount <= 0) return;
+  expenses.push({ name, amount });
+  nameInput.value = '';
+  amountInput.value = '';
+  renderExpenses();
+  calc();
+});
+
+function fmt(n) { return Math.round(n).toLocaleString('it-IT'); }
+function fmtE(n) { return '€' + Math.round(n).toLocaleString('it-IT'); }
+
+function calc() {
+  const area = +els.area.value;
+  const density = +els.density.value;
+  const eggsPer = +els.eggsper.value;
+  const price = +els.price.value;
+  const feedPct = +els.feedpct.value / 100;
+  const feedPrice = +els.feedprice.value;
+  const packaging = +els.packaging.value;
+  const fixed = +els.fixed.value;
+
+  document.getElementById('area-out').textContent = fmt(area) + ' m²';
+  document.getElementById('density-out').textContent = density + ' m²';
+  document.getElementById('eggsper-out').textContent = eggsPer;
+  document.getElementById('price-out').textContent = '€' + price.toFixed(2);
+  document.getElementById('feedpct-out').textContent = Math.round(feedPct * 100) + '%';
+  document.getElementById('feedprice-out').textContent = '€' + feedPrice.toFixed(2);
+  document.getElementById('packaging-out').textContent = '€' + packaging.toFixed(2);
+  document.getElementById('fixed-out').textContent = '€' + Math.round(fixed);
+
+  const hens = Math.floor(area / density);
+  const monthlyEggs = hens * eggsPer;
+  const revenue = monthlyEggs * price;
+
+  const feedKgTotalMonth = hens * (125 * 30 / 1000);
+  const feedCost = feedKgTotalMonth * feedPct * feedPrice;
+  const packCost = monthlyEggs * packaging;
+  const amort = (hens * 13) / 18;
+  const totalCosts = feedCost + packCost + amort + fixed + extra;
+  const profit = revenue - totalCosts;
+
+  document.getElementById('out-hens').textContent = fmt(hens);
+  document.getElementById('out-eggs').textContent = fmt(monthlyEggs);
+  document.getElementById('out-profit').textContent = fmtE(profit);
+  document.getElementById('out-annual').textContent = fmtE(profit * 12);
+
+  document.getElementById('row-revenue').textContent = fmtE(revenue);
+  document.getElementById('row-feed').textContent = '-' + fmtE(feedCost);
+  document.getElementById('row-pack').textContent = '-' + fmtE(packCost);
+  document.getElementById('row-amort').textContent = '-' + fmtE(amort);
+  document.getElementById('row-fixed').textContent = '-' + fmtE(fixed);
+  document.getElementById('row-extra-list').innerHTML = expenses.map(e =>
+    '<tr><td>' + e.name + '</td><td class="cost">-' + fmtE(e.amount) + '</td></tr>'
+  ).join('');
+  document.getElementById('row-total-costs').textContent = '-' + fmtE(totalCosts);
+}
+
+ids.forEach(id => els[id].addEventListener('input', calc));
+calc();
+</script>
+</body>
+</html>
