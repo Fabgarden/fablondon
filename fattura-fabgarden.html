@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fab Garden — Invoices</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --pine:#243d2f;
+    --pine-deep:#152218;
+    --sage-bg:#e9ede2;
+    --leaf:#5c7d5a;
+    --leaf-light:#dfe6d5;
+    --gold:#ffd93d;
+    --soil:#8a6142;
+    --paper:#fffdf8;
+    --line:#d7ddc8;
+    --danger:#a4453b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--sage-bg);
+    font-family:'Work Sans', sans-serif;
+    color:var(--pine-deep);
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  h1.appTitle{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:28px;
+    color:var(--pine);
+    margin:0 0 4px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .appSub{color:#5b6b57;font-size:14px;margin:0 0 24px;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:380px 1fr;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:880px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+  }
+  .panel + .panel{margin-top:18px;}
+
+  .panelTitle{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--pine);
+    margin:0 0 14px;
+    letter-spacing:.01em;
+  }
+
+  label.fieldLabel{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:#7c8a76;
+    margin-bottom:5px;
+    font-weight:600;
+  }
+  input[type=text], input[type=date], input[type=number], textarea{
+    width:100%;
+    padding:9px 11px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-family:'Work Sans', sans-serif;
+    font-size:14px;
+    background:#fbfaf6;
+    color:var(--pine-deep);
+  }
+  input:focus, textarea:focus{
+    outline:none;
+    border-color:var(--leaf);
+    background:#fff;
+  }
+  .fieldRow{margin-bottom:14px;}
+  .fieldRow2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+
+  .chipGrid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:4px;
+  }
+  .chip{
+    border:1px solid var(--leaf);
+    background:var(--leaf-light);
+    color:var(--pine);
+    padding:7px 12px;
+    border-radius:999px;
+    font-size:13px;
+    cursor:pointer;
+    font-weight:500;
+    transition:background .15s, transform .1s;
+  }
+  .chip:hover{background:#cddcc0;}
+  .chip:active{transform:scale(0.97);}
+
+  .customAdd{
+    display:grid;
+    grid-template-columns:1fr 74px 34px;
+    gap:8px;
+    margin-top:12px;
+  }
+  .customAdd input{padding:8px 9px;font-size:13px;}
+  .addBtn{
+    background:var(--pine);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:18px;
+    line-height:1;
+    font-weight:600;
+  }
+  .addBtn:hover{background:var(--pine-deep);}
+
+  .bankFields{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .bankFields .full{grid-column:1/-1;}
+
+  .saveNote{
+    font-size:11.5px;
+    color:#7c8a76;
+    margin-top:8px;
+  }
+
+  /* INVOICE PREVIEW */
+  #invoiceCard{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:38px 42px;
+    position:relative;
+    overflow:hidden;
+  }
+  .invHead{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    border-bottom:2px solid var(--pine);
+    padding-bottom:18px;
+    margin-bottom:22px;
+    position:relative;
+  }
+  .brandBlock .brandName{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:32px;
+    color:var(--pine);
+    margin:0;
+    line-height:1;
+  }
+  .brandBlock .brandTag{
+    font-size:12.5px;
+    color:var(--leaf);
+    margin-top:4px;
+    font-weight:500;
+    letter-spacing:.02em;
+  }
+  .contactBlock{
+    text-align:right;
+    font-size:12.5px;
+    color:#4d5a49;
+    line-height:1.6;
+  }
+  .contactBlock [contenteditable]:focus{
+    outline:1px dashed var(--leaf);
+    background:#fbfaf6;
+  }
+  .invMeta{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:22px;
+    font-size:13px;
+  }
+  .metaCol .metaLabel{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:#8a9484;
+    font-weight:600;
+    margin-bottom:3px;
+  }
+  .metaCol .metaVal{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13.5px;
+    color:var(--pine-deep);
+  }
+  .clientBanner{
+    background:var(--pine);
+    color:#fff;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:17px;
+    padding:9px 16px;
+    border-radius:8px;
+    display:inline-block;
+    margin-bottom:24px;
+    min-width:160px;
+  }
+  .clientBanner.empty{
+    opacity:.35;
+    font-style:italic;
+    font-weight:400;
+    font-size:14px;
+  }
+
+  table.items{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:8px;
+  }
+  table.items thead th{
+    text-align:left;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:#8a9484;
+    font-weight:600;
+    padding:0 8px 8px 0;
+    border-bottom:1px solid var(--line);
+  }
+  table.items thead th.num{text-align:right;}
+  table.items tbody td{
+    padding:10px 8px;
+    font-size:14px;
+    border-bottom:1px dotted var(--line);
+    vertical-align:middle;
+  }
+  table.items tbody td.num{
+    text-align:right;
+    font-family:'JetBrains Mono', monospace;
+    font-size:13.5px;
+  }
+  table.items tbody td.desc{font-weight:500;color:var(--pine-deep);}
+  .lineInput{
+    width:52px;
+    padding:4px 5px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    border:1px solid transparent;
+    background:transparent;
+    text-align:right;
+    border-radius:5px;
+  }
+  .lineInput:hover, .lineInput:focus{
+    border-color:var(--line);
+    background:#fbfaf6;
+    outline:none;
+  }
+  .dateInput{
+    width:64px;
+    text-align:center;
+    font-family:'Work Sans', sans-serif;
+    font-size:12.5px;
+    color:#6b7a67;
+  }
+  .rmBtn{
+    background:none;
+    border:none;
+    color:#b7bfae;
+    cursor:pointer;
+    font-size:15px;
+    padding:2px 6px;
+  }
+  .rmBtn:hover{color:var(--danger);}
+  .export-mode .rmBtn{visibility:hidden;}
+
+  .emptyRow td{
+    text-align:center;
+    color:#a9b39f;
+    font-style:italic;
+    font-size:13px;
+    padding:22px 0;
+  }
+
+  .totalsBlock{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-top:20px;
+    gap:20px;
+  }
+  .bankInline{
+    font-size:13.5px;
+    color:var(--pine-deep);
+    line-height:1.75;
+    background:var(--leaf-light);
+    border:1px solid var(--leaf);
+    border-radius:10px;
+    padding:12px 16px;
+  }
+  .bankInline .bLabel{
+    font-weight:700;
+    color:var(--pine);
+    margin-bottom:5px;
+    font-family:'Fraunces', serif;
+    font-size:14px;
+  }
+  .bankInline div:not(.bLabel){
+    font-weight:700;
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+  }
+  .bankInline [contenteditable]:focus{
+    outline:1px dashed var(--leaf);
+    background:#fff;
+  }
+  .totalsInner{min-width:230px;}
+  .totalRow{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 14px;
+    background:var(--gold);
+    border-radius:8px;
+    margin-top:6px;
+  }
+  .totalRow .tLabel{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:16px;
+    color:var(--pine-deep);
+  }
+  .totalRow .tVal{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:18px;
+    color:var(--pine-deep);
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    border:none;
+    border-radius:8px;
+    padding:11px 18px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Work Sans', sans-serif;
+  }
+  .btn.primary{background:var(--pine);color:#fff;}
+  .btn.primary:hover{background:var(--pine-deep);}
+  .btn.ghost{background:#fff;color:var(--pine);border:1px solid var(--pine);}
+  .btn.ghost:hover{background:var(--leaf-light);}
+  .btn.warn{background:#fff;color:var(--danger);border:1px solid var(--danger);}
+  .btn.warn:hover{background:#fbe9e7;}
+
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--pine-deep);
+    color:#fff;
+    padding:11px 20px;
+    border-radius:999px;
+    font-size:13.5px;
+    opacity:0;
+    transition:opacity .25s, transform .25s;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:520px){
+    #invoiceCard{padding:24px 18px;}
+    .invHead{flex-direction:column;gap:14px;}
+    .contactBlock{text-align:left;}
+    .brandBlock .brandName{font-size:26px;}
+    .totalsBlock{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="appTitle"><span>🌿</span> Fab Garden — Invoice Generator</h1>
+  <p class="appSub">Pick the client and the jobs done: the invoice builds itself. Then download the image or take a screenshot.</p>
+
+  <div class="grid">
+    <!-- LEFT: CONTROLS -->
+    <div>
+      <div class="panel">
+        <div class="panelTitle">Client and date</div>
+        <div class="fieldRow">
+          <label class="fieldLabel">Client name</label>
+          <input type="text" id="clientName" placeholder="e.g. Lana" oninput="renderInvoice()">
+        </div>
+        <div class="fieldRow2">
+          <div>
+            <label class="fieldLabel">Date</label>
+            <input type="date" id="invDate" onchange="renderInvoice()">
+          </div>
+          <div>
+            <label class="fieldLabel">Invoice No.</label>
+            <input type="text" id="invNumber" oninput="renderInvoice()">
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panelTitle">Add jobs</div>
+        <div class="chipGrid" id="chipGrid"></div>
+
+        <div class="customAdd">
+          <input type="text" id="customDesc" placeholder="Custom item">
+          <input type="number" id="customPrice" placeholder="£">
+          <button class="addBtn" onclick="addCustomItem()">+</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panelTitle">Bank details (shown on invoice)</div>
+        <div class="bankFields">
+          <div class="full">
+            <label class="fieldLabel">Bank / Name</label>
+            <input type="text" id="bankName" oninput="saveSettings(); renderInvoice()">
+          </div>
+          <div>
+            <label class="fieldLabel">Account number</label>
+            <input type="text" id="bankAccount" oninput="saveSettings(); renderInvoice()">
+          </div>
+          <div>
+            <label class="fieldLabel">Sort code</label>
+            <input type="text" id="bankSort" oninput="saveSettings(); renderInvoice()">
+          </div>
+        </div>
+        <div class="saveNote">Saved automatically in your browser.</div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn primary" onclick="downloadImage()">📷 Download image</button>
+        <button class="btn ghost" onclick="newInvoice()">＋ New invoice</button>
+        <button class="btn warn" onclick="clearItems()">Clear items</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: INVOICE PREVIEW -->
+    <div>
+      <div id="invoiceCard">
+        <div class="invHead">
+          <div class="brandBlock">
+            <p class="brandName">Fab Garden</p>
+            <p class="brandTag">Gardening &amp; maintenance — South-East London</p>
+          </div>
+          <div class="contactBlock">
+            <div>Tel: <span contenteditable="true" id="cPhone">07915 199629</span></div>
+            <div>Web: <span contenteditable="true" id="cWeb">fabgarden.co.uk</span></div>
+            <div>Email: <span contenteditable="true" id="cEmail">fabgarden@yahoo.com</span></div>
+          </div>
+        </div>
+
+        <div class="invMeta">
+          <div class="metaCol">
+            <div class="metaLabel">Date</div>
+            <div class="metaVal" id="mDate">—</div>
+          </div>
+          <div class="metaCol" style="text-align:right;">
+            <div class="metaLabel">Invoice No.</div>
+            <div class="metaVal" id="mNumber">—</div>
+          </div>
+        </div>
+
+        <div id="clientBannerWrap"><span class="clientBanner empty" id="clientBanner">Client name</span></div>
+
+        <table class="items">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th class="num">Qty</th>
+              <th class="num">Date</th>
+              <th class="num">Price (£)</th>
+              <th class="num">Total (£)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody">
+            <tr class="emptyRow"><td colspan="6">No items yet — add a job from the panel on the left</td></tr>
+          </tbody>
+        </table>
+
+        <div class="totalsBlock">
+          <div class="bankInline">
+            <div class="bLabel">Bank details</div>
+            <div><span contenteditable="true" id="bNameShow">Natwest Bank</span></div>
+            <div><span contenteditable="true" id="bHolderShow">Fab Garden</span></div>
+            <div>Account: <span contenteditable="true" id="bAccShow">18690262</span></div>
+            <div>Sort code: <span contenteditable="true" id="bSortShow">60-24-26</span></div>
+          </div>
+          <div class="totalsInner">
+            <div class="totalRow">
+              <span class="tLabel">Total</span>
+              <span class="tVal" id="grandTotal">£0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SERVICES = [
+  {label:"Garden maintenance", desc:"Garden maintenance", qty:3, unit:"hrs", price:30},
+  {label:"Jumbo bag", desc:"1 Jumbo bag", qty:1, unit:"", price:15},
+  {label:"Weed killer", desc:"Weed killer", qty:1, unit:"", price:15},
+  {label:"Green waste removal", desc:"Green waste removal", qty:1, unit:"", price:20},
+];
+
+let items = [];
+
+function loadSettings(){
+  const s = JSON.parse(localStorage.getItem('fabgarden_settings') || '{}');
+  document.getElementById('bankName').value = s.bankName || 'Natwest Bank';
+  document.getElementById('bankAccount').value = s.bankAccount || '18690262';
+  document.getElementById('bankSort').value = s.bankSort || '60-24-26';
+
+  const seq = parseInt(localStorage.getItem('fabgarden_invoice_seq') || '1');
+  document.getElementById('invNumber').value = 'FG-' + new Date().getFullYear() + '-' + String(seq).padStart(3,'0');
+  document.getElementById('invDate').value = new Date().toISOString().slice(0,10);
+}
+
+function saveSettings(){
+  const s = {
+    bankName: document.getElementById('bankName').value,
+    bankAccount: document.getElementById('bankAccount').value,
+    bankSort: document.getElementById('bankSort').value
+  };
+  localStorage.setItem('fabgarden_settings', JSON.stringify(s));
+}
+
+function buildChips(){
+  const grid = document.getElementById('chipGrid');
+  grid.innerHTML = '';
+  SERVICES.forEach((s, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = s.label;
+    chip.onclick = () => addServiceItem(i);
+    grid.appendChild(chip);
+  });
+}
+
+function addServiceItem(i){
+  const s = SERVICES[i];
+  items.push({desc: s.desc, qty: s.qty, date: '', price: s.price});
+  renderInvoice();
+}
+
+function addCustomItem(){
+  const desc = document.getElementById('customDesc').value.trim();
+  const price = parseFloat(document.getElementById('customPrice').value);
+  if(!desc || isNaN(price)) { showToast('Enter a description and price'); return; }
+  items.push({desc, qty:1, date:'', price});
+  document.getElementById('customDesc').value = '';
+  document.getElementById('customPrice').value = '';
+  renderInvoice();
+}
+
+function removeItem(idx){
+  items.splice(idx,1);
+  renderInvoice();
+}
+
+function updateItem(idx, field, value){
+  if(field === 'date'){
+    items[idx][field] = value;
+  } else {
+    items[idx][field] = parseFloat(value) || 0;
+  }
+  renderInvoice();
+}
+
+function renderInvoice(){
+  document.getElementById('mDate').textContent = formatDate(document.getElementById('invDate').value);
+  document.getElementById('mNumber').textContent = document.getElementById('invNumber').value || '—';
+
+  const name = document.getElementById('clientName').value.trim();
+  const banner = document.getElementById('clientBanner');
+  if(name){
+    banner.textContent = name.toUpperCase();
+    banner.classList.remove('empty');
+  } else {
+    banner.textContent = 'Client name';
+    banner.classList.add('empty');
+  }
+
+  const body = document.getElementById('itemsBody');
+  body.innerHTML = '';
+  if(items.length === 0){
+    body.innerHTML = '<tr class="emptyRow"><td colspan="6">No items yet — add a job from the panel on the left</td></tr>';
+  } else {
+    items.forEach((it, idx) => {
+      const total = (it.qty * it.price) || 0;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="desc">${escapeHtml(it.desc)}</td>
+        <td class="num"><input class="lineInput" type="number" step="0.5" value="${it.qty}" onchange="updateItem(${idx}, 'qty', this.value)"></td>
+        <td class="num"><input class="lineInput dateInput" type="text" placeholder="dd/mm" value="${it.date || ''}" onchange="updateItem(${idx}, 'date', this.value)"></td>
+        <td class="num"><input class="lineInput" type="number" step="0.5" value="${it.price}" onchange="updateItem(${idx}, 'price', this.value)"></td>
+        <td class="num">£${total.toFixed(2)}</td>
+        <td><button class="rmBtn" onclick="removeItem(${idx})">✕</button></td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  const grand = items.reduce((sum, it) => sum + (it.qty * it.price || 0), 0);
+  document.getElementById('grandTotal').textContent = '£' + grand.toFixed(2);
+
+  // sync bank display
+  document.getElementById('bNameShow').textContent = document.getElementById('bankName').value;
+  document.getElementById('bAccShow').textContent = document.getElementById('bankAccount').value;
+  document.getElementById('bSortShow').textContent = document.getElementById('bankSort').value;
+}
+
+function formatDate(iso){
+  if(!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y.slice(2)}`;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function newInvoice(){
+  items = [];
+  document.getElementById('clientName').value = '';
+  document.getElementById('invDate').value = new Date().toISOString().slice(0,10);
+  const seq = parseInt(localStorage.getItem('fabgarden_invoice_seq') || '1');
+  document.getElementById('invNumber').value = 'FG-' + new Date().getFullYear() + '-' + String(seq).padStart(3,'0');
+  renderInvoice();
+  showToast('New invoice ready');
+}
+
+function clearItems(){
+  items = [];
+  renderInvoice();
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function downloadImage(){
+  const card = document.getElementById('invoiceCard');
+  card.classList.add('export-mode');
+  html2canvas(card, {scale:2, backgroundColor:'#fffdf8'}).then(canvas => {
+    card.classList.remove('export-mode');
+    const link = document.createElement('a');
+    const name = document.getElementById('clientName').value.trim() || 'client';
+    link.download = `invoice-${name.replace(/\s+/g,'_')}-${document.getElementById('invNumber').value}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    advanceInvoiceNumber();
+    showToast('Image downloaded');
+  }).catch(()=> {
+    card.classList.remove('export-mode');
+    showToast('Download error');
+  });
+}
+
+function advanceInvoiceNumber(){
+  const seq = parseInt(localStorage.getItem('fabgarden_invoice_seq') || '1');
+  localStorage.setItem('fabgarden_invoice_seq', seq + 1);
+}
+
+loadSettings();
+buildChips();
+renderInvoice();
+</script>
+</body>
+</html>
