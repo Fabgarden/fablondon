@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fab Garden — Earnings Tracker</title>
+<meta name="theme-color" content="#243d2f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FabGarden">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --pine:#243d2f;
+    --pine-deep:#152218;
+    --sage-bg:#e9ede2;
+    --leaf:#5c7d5a;
+    --leaf-light:#dfe6d5;
+    --gold:#ffd93d;
+    --paper:#fffdf8;
+    --line:#d7ddc8;
+    --danger:#a4453b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--sage-bg);
+    font-family:'Work Sans', sans-serif;
+    color:var(--pine-deep);
+    padding:calc(28px + env(safe-area-inset-top)) 16px calc(60px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:1600px;margin:0 auto;}
+
+  h1.appTitle{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:32px;
+    color:var(--pine);
+    margin:0 0 4px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .appSub{color:#5b6b57;font-size:15px;margin:0 0 24px;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:380px 1fr 380px;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:1180px){
+    .grid{grid-template-columns:380px 1fr;}
+    .calendarCol{grid-column:1/-1;}
+  }
+  @media (max-width:880px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+  }
+  .panel + .panel{margin-top:18px;}
+
+  .panelTitle{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--pine);
+    margin:0 0 14px;
+    letter-spacing:.01em;
+  }
+
+  label.fieldLabel{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:#7c8a76;
+    margin-bottom:5px;
+    font-weight:600;
+  }
+  input[type=text], input[type=date], input[type=number]{
+    width:100%;
+    padding:9px 11px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-family:'Work Sans', sans-serif;
+    font-size:14px;
+    background:#fbfaf6;
+    color:var(--pine-deep);
+  }
+  input:focus{
+    outline:none;
+    border-color:var(--leaf);
+    background:#fff;
+  }
+  .fieldRow{margin-bottom:14px;}
+  .fieldRow2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+
+  .addBtn{
+    width:100%;
+    background:var(--pine);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+    padding:11px;
+    font-family:'Work Sans', sans-serif;
+  }
+  .addBtn:hover{background:var(--pine-deep);}
+
+  .entryList{
+    max-height:340px;
+    overflow-y:auto;
+    margin-top:4px;
+  }
+  .entryRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:9px 0;
+    border-bottom:1px dotted var(--line);
+    font-size:13px;
+  }
+  .entryRow:last-child{border-bottom:none;}
+  .entryMeta{display:flex;flex-direction:column;gap:2px;}
+  .entryClient{font-weight:600;color:var(--pine-deep);}
+  .entryDate{font-size:11.5px;color:#8a9484;font-family:'JetBrains Mono', monospace;}
+  .entryAmount{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    color:var(--pine);
+    margin-right:8px;
+  }
+  .rmBtn{
+    background:none;
+    border:none;
+    color:#b7bfae;
+    cursor:pointer;
+    font-size:14px;
+    padding:2px 4px;
+  }
+  .rmBtn:hover{color:var(--danger);}
+  .emptyNote{
+    color:#a9b39f;
+    font-style:italic;
+    font-size:13px;
+    text-align:center;
+    padding:16px 0;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    border:none;
+    border-radius:8px;
+    padding:11px 18px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Work Sans', sans-serif;
+  }
+  .btn.primary{background:var(--pine);color:#fff;}
+  .btn.primary:hover{background:var(--pine-deep);}
+  .btn.warn{background:#fff;color:var(--danger);border:1px solid var(--danger);}
+  .btn.warn:hover{background:#fbe9e7;}
+
+  /* DASHBOARD (right side) */
+  #dashboardCard{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:30px 32px;
+  }
+  .dashHead{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    border-bottom:2px solid var(--pine);
+    padding-bottom:16px;
+    margin-bottom:22px;
+  }
+  .dashHead .brandName{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:26px;
+    color:var(--pine);
+    margin:0;
+    line-height:1;
+  }
+  .dashHead .brandTag{
+    font-size:12.5px;
+    color:var(--leaf);
+    margin-top:4px;
+    font-weight:500;
+  }
+
+  .statRow{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px;
+    margin-bottom:26px;
+  }
+  @media (max-width:700px){
+    .statRow{grid-template-columns:repeat(2, 1fr);}
+  }
+  .statCard{
+    background:var(--sage-bg);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .statCard .sLabel{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:#7c8a76;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .statCard .sVal{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:21px;
+    color:var(--pine-deep);
+  }
+  .statCard .sSub{
+    font-size:11px;
+    color:var(--leaf);
+    margin-top:3px;
+  }
+
+  .chartWrap{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 18px 8px;
+    margin-bottom:26px;
+  }
+  .chartTitle{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--pine);
+    margin-bottom:10px;
+  }
+  .chartEmpty{
+    text-align:center;
+    color:#a9b39f;
+    font-style:italic;
+    font-size:13px;
+    padding:50px 0;
+  }
+  .axisLabels{
+    display:flex;
+    justify-content:space-between;
+    font-size:14px;
+    font-weight:600;
+    color:#5b6b57;
+    font-family:'JetBrains Mono', monospace;
+    margin-top:8px;
+    padding:0 4px;
+  }
+
+  .weeklyTitle{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--pine);
+    margin-bottom:10px;
+  }
+  .weekRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:11px 14px;
+    border-radius:8px;
+    background:var(--leaf-light);
+    margin-bottom:8px;
+  }
+  .weekRow .wLabel{
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--pine-deep);
+  }
+  .weekRow .wSub{
+    font-size:11px;
+    color:#5b6b57;
+    margin-top:2px;
+  }
+  .weekRow .wTotal{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:16px;
+    background:var(--gold);
+    padding:6px 12px;
+    border-radius:7px;
+    color:var(--pine-deep);
+  }
+
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--pine-deep);
+    color:#fff;
+    padding:11px 20px;
+    border-radius:999px;
+    font-size:13.5px;
+    opacity:0;
+    transition:opacity .25s, transform .25s;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* CALENDAR */
+  .calNav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  .calNavBtn{
+    background:var(--leaf-light);
+    border:1px solid var(--leaf);
+    color:var(--pine);
+    border-radius:6px;
+    width:26px;
+    height:26px;
+    cursor:pointer;
+    font-size:13px;
+    line-height:1;
+  }
+  .calNavBtn:hover{background:#cddcc0;}
+  .calMonthLabel{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--pine);
+  }
+  .calGrid{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    gap:6px;
+    padding-bottom:4px;
+  }
+  .calDow{
+    text-align:center;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#8a9484;
+    font-weight:600;
+    padding-bottom:6px;
+  }
+  .calCell{
+    min-height:52px;
+    border-radius:7px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    padding:4px 2px;
+    background:#fbfaf6;
+    border:1px solid var(--line);
+  }
+  .calCell.blank{
+    background:transparent;
+    border:none;
+  }
+  .calCell.hasEarning{
+    background:var(--leaf-light);
+    border-color:var(--leaf);
+  }
+  .calCell.today{
+    outline:2px solid var(--pine);
+    outline-offset:-2px;
+  }
+  .calDayNum{
+    font-weight:600;
+    font-size:13px;
+    color:var(--pine-deep);
+    line-height:1.1;
+  }
+  .calAmount{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:10.5px;
+    color:var(--pine-deep);
+    background:var(--gold);
+    padding:2px 5px;
+    border-radius:5px;
+    margin-top:3px;
+    white-space:nowrap;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="appTitle"><span>🌿</span> Fab Garden — Earnings Tracker</h1>
+  <p class="appSub">Log what each client pays you day by day. The chart and weekly totals build up automatically.</p>
+
+  <div class="grid">
+    <!-- LEFT: ENTRY FORM + LIST -->
+    <div>
+      <div class="panel">
+        <div class="panelTitle">Log today's earnings</div>
+        <div class="fieldRow">
+          <label class="fieldLabel">Date</label>
+          <input type="date" id="entryDate">
+        </div>
+        <div class="fieldRow">
+          <label class="fieldLabel">Client name</label>
+          <input type="text" id="entryClient" placeholder="e.g. Lucia">
+        </div>
+        <div class="fieldRow">
+          <label class="fieldLabel">Amount earned (£)</label>
+          <input type="number" id="entryAmount" placeholder="0.00" step="0.01">
+        </div>
+        <button class="addBtn" onclick="addEntry()">+ Add entry</button>
+      </div>
+
+      <div class="panel">
+        <div class="panelTitle">Recent entries</div>
+        <div class="entryList" id="entryList"></div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn primary" onclick="downloadDashboard()">📷 Download chart</button>
+        <button class="btn primary" onclick="exportBackup()">⬇️ Export backup</button>
+        <button class="btn primary" onclick="document.getElementById('backupFile').click()">⬆️ Import backup</button>
+        <input type="file" id="backupFile" accept="application/json,.json" hidden onchange="importBackup(event)">
+        <button class="btn warn" onclick="clearAll()">Clear all data</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: DASHBOARD -->
+    <div>
+      <div id="dashboardCard">
+        <div class="dashHead">
+          <div>
+            <p class="brandName">Fab Garden</p>
+            <p class="brandTag">Earnings overview</p>
+          </div>
+        </div>
+
+        <div class="statRow">
+          <div class="statCard">
+            <div class="sLabel">Total earnings</div>
+            <div class="sVal" id="statTotal">£0.00</div>
+          </div>
+          <div class="statCard">
+            <div class="sLabel">This week</div>
+            <div class="sVal" id="statWeek">£0.00</div>
+          </div>
+          <div class="statCard">
+            <div class="sLabel">This month</div>
+            <div class="sVal" id="statMonth">£0.00</div>
+          </div>
+        </div>
+
+        <div class="chartWrap">
+          <div class="chartTitle">Earnings over time</div>
+          <div id="chartHolder"></div>
+          <div class="axisLabels" id="axisLabels"></div>
+        </div>
+
+        <div class="weeklyTitle">Weekly breakdown</div>
+        <div id="weeklyList"></div>
+      </div>
+    </div>
+
+    <!-- CALENDAR COLUMN -->
+    <div class="calendarCol">
+      <div class="panel" style="padding-bottom:26px;">
+        <div class="calNav">
+          <button class="calNavBtn" onclick="calPrevMonth()">‹</button>
+          <span class="calMonthLabel" id="calMonthLabel">—</span>
+          <button class="calNavBtn" onclick="calNextMonth()">›</button>
+        </div>
+        <div class="calGrid" id="calGrid"></div>
+      </div>
+
+      <div class="panel">
+        <div class="weeklyTitle">Months breakdown</div>
+        <div id="monthlyList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let entries = [];
+
+function loadData(){
+  try {
+    const saved = JSON.parse(localStorage.getItem('fabgarden_earnings') || '[]');
+    entries = Array.isArray(saved) ? saved : [];
+  } catch (error) {
+    entries = [];
+    showToast('Saved data could not be read');
+  }
+  document.getElementById('entryDate').value = new Date().toISOString().slice(0,10);
+}
+
+function saveData(){
+  localStorage.setItem('fabgarden_earnings', JSON.stringify(entries));
+}
+
+function exportBackup(){
+  const backup = {
+    app: 'FabGarden Earnings Tracker',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    entries
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `fabgarden-backup-${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('Backup exported');
+}
+
+function importBackup(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const backup = JSON.parse(reader.result);
+      const imported = Array.isArray(backup) ? backup : backup.entries;
+      if(!Array.isArray(imported)) throw new Error('Invalid backup');
+      const valid = imported.every(e => e && Number.isFinite(Number(e.amount)) && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && typeof e.client === 'string');
+      if(!valid) throw new Error('Invalid entries');
+      if(!confirm(`Import ${imported.length} entries? This will replace the data currently on this device.`)) return;
+      entries = imported.map((e, index) => ({
+        id: Number(e.id) || Date.now() + index,
+        date: e.date,
+        client: e.client,
+        amount: Number(e.amount)
+      }));
+      saveData();
+      renderAll();
+      showToast('Backup restored');
+    } catch (error) {
+      showToast('Invalid backup file');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function addEntry(){
+  const date = document.getElementById('entryDate').value;
+  const client = document.getElementById('entryClient').value.trim();
+  const amount = parseFloat(document.getElementById('entryAmount').value);
+  if(!date || !client || isNaN(amount)){
+    showToast('Fill in date, client and amount');
+    return;
+  }
+  entries.push({id: Date.now(), date, client, amount});
+  saveData();
+  document.getElementById('entryClient').value = '';
+  document.getElementById('entryAmount').value = '';
+  renderAll();
+  showToast('Entry added');
+}
+
+function removeEntry(id){
+  entries = entries.filter(e => e.id !== id);
+  saveData();
+  renderAll();
+}
+
+function clearAll(){
+  if(!confirm('Delete all logged earnings? This cannot be undone.')) return;
+  entries = [];
+  saveData();
+  renderAll();
+  showToast('All data cleared');
+}
+
+function fmtMoney(n){
+  return '£' + n.toFixed(2);
+}
+
+function fmtDateShort(iso){
+  const d = new Date(iso + 'T00:00:00');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d.getDate() + ' ' + months[d.getMonth()];
+}
+
+function getMonday(dateObj){
+  const d = new Date(dateObj);
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function renderEntryList(){
+  const list = document.getElementById('entryList');
+  if(entries.length === 0){
+    list.innerHTML = '<div class="emptyNote">No entries yet</div>';
+    return;
+  }
+  const sorted = [...entries].sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
+  list.innerHTML = sorted.map(e => `
+    <div class="entryRow">
+      <div class="entryMeta">
+        <span class="entryClient">${escapeHtml(e.client)}</span>
+        <span class="entryDate">${fmtDateShort(e.date)}</span>
+      </div>
+      <div>
+        <span class="entryAmount">${fmtMoney(e.amount)}</span>
+        <button class="rmBtn" onclick="removeEntry(${e.id})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStats(){
+  const total = entries.reduce((s,e) => s + e.amount, 0);
+  document.getElementById('statTotal').textContent = fmtMoney(total);
+
+  const now = new Date();
+  const weekStart = getMonday(now);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7);
+  const weekTotal = entries.filter(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    return d >= weekStart && d < weekEnd;
+  }).reduce((s,e) => s + e.amount, 0);
+  document.getElementById('statWeek').textContent = fmtMoney(weekTotal);
+
+  const monthTotal = entries.filter(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).reduce((s,e) => s + e.amount, 0);
+  document.getElementById('statMonth').textContent = fmtMoney(monthTotal);
+}
+
+function niceStep(roughStep){
+  const mag = Math.pow(10, Math.floor(Math.log10(roughStep || 1)));
+  const norm = roughStep / mag;
+  let step;
+  if(norm <= 1) step = 1;
+  else if(norm <= 2) step = 2;
+  else if(norm <= 5) step = 5;
+  else step = 10;
+  return step * mag;
+}
+
+function renderChart(){
+  const holder = document.getElementById('chartHolder');
+  const axis = document.getElementById('axisLabels');
+
+  if(entries.length === 0){
+    holder.innerHTML = '<div class="chartEmpty">Add some entries to see your trend</div>';
+    axis.innerHTML = '';
+    return;
+  }
+
+  const byDay = {};
+  entries.forEach(e => { byDay[e.date] = (byDay[e.date] || 0) + e.amount; });
+  const days = Object.keys(byDay).sort();
+  const values = days.map(d => byDay[d]);
+  const rawMax = Math.max(...values, 1);
+
+  const step = niceStep(rawMax / 4);
+  const topValue = step * 4;
+
+  const W = 900, H = 340, padL = 10, padR = 70, padT = 20, padB = 10;
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+  const stepX = days.length > 1 ? innerW / (days.length - 1) : 0;
+
+  const points = values.map((v,i) => {
+    const x = padL + (days.length > 1 ? i * stepX : innerW/2);
+    const y = padT + innerH - (v / topValue) * innerH;
+    return [x,y];
+  });
+
+  const linePath = points.map((p,i) => (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const areaPath = linePath + ` L${points[points.length-1][0].toFixed(1)},${(padT+innerH).toFixed(1)} L${points[0][0].toFixed(1)},${(padT+innerH).toFixed(1)} Z`;
+
+  const gridSteps = [0,1,2,3,4];
+  const gridLines = gridSteps.map(i => {
+    const y = padT + innerH - (i/4) * innerH;
+    const val = step * i;
+    return `
+      <line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#d7ddc8" stroke-width="1" />
+      <text x="${W-padR+10}" y="${(y+6).toFixed(1)}" font-size="20" font-weight="700" fill="#5b6b57" font-family='JetBrains Mono, monospace'>£${val}</text>
+    `;
+  }).join('');
+
+  const dots = points.map(p => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4.5" fill="#243d2f" />`).join('');
+
+  holder.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="340" xmlns="http://www.w3.org/2000/svg">
+      ${gridLines}
+      <path d="${areaPath}" fill="rgba(92,125,90,0.18)" stroke="none" />
+      <path d="${linePath}" fill="none" stroke="#5c7d5a" stroke-width="3.5" />
+      ${dots}
+    </svg>
+  `;
+
+  const maxLabels = 7;
+  const labelIdxs = [];
+  if(days.length <= maxLabels){
+    for(let i=0;i<days.length;i++) labelIdxs.push(i);
+  } else {
+    for(let i=0;i<maxLabels;i++){
+      labelIdxs.push(Math.round(i * (days.length-1) / (maxLabels-1)));
+    }
+  }
+  axis.innerHTML = [...new Set(labelIdxs)].map(i => `<span>${fmtDateShort(days[i])}</span>`).join('');
+}
+
+function renderWeekly(){
+  const container = document.getElementById('weeklyList');
+  if(entries.length === 0){
+    container.innerHTML = '<div class="emptyNote">No weekly data yet</div>';
+    return;
+  }
+  const weeks = {};
+  entries.forEach(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    const monday = getMonday(d);
+    const key = monday.toISOString().slice(0,10);
+    weeks[key] = (weeks[key] || 0) + e.amount;
+  });
+  const sortedKeys = Object.keys(weeks).sort().reverse();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  container.innerHTML = sortedKeys.map(key => {
+    const start = new Date(key + 'T00:00:00');
+    const end = new Date(start); end.setDate(end.getDate() + 6);
+    const label = `${start.getDate()} ${months[start.getMonth()]} – ${end.getDate()} ${months[end.getMonth()]}`;
+    return `
+      <div class="weekRow">
+        <div>
+          <div class="wLabel">Week of ${label}</div>
+        </div>
+        <div class="wTotal">${fmtMoney(weeks[key])}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderMonthly(){
+  const container = document.getElementById('monthlyList');
+  if(entries.length === 0){
+    container.innerHTML = '<div class="emptyNote">No monthly data yet</div>';
+    return;
+  }
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const months = {};
+  entries.forEach(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    months[key] = (months[key] || 0) + e.amount;
+  });
+  const sortedKeys = Object.keys(months).sort().reverse();
+  container.innerHTML = sortedKeys.map(key => {
+    const [y, m] = key.split('-').map(Number);
+    const label = monthNames[m-1] + ' ' + y;
+    return `
+      <div class="weekRow">
+        <div>
+          <div class="wLabel">${label}</div>
+        </div>
+        <div class="wTotal">${fmtMoney(months[key])}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAll(){
+  renderEntryList();
+  renderStats();
+  renderChart();
+  renderWeekly();
+  renderMonthly();
+  renderCalendar();
+}
+
+let calYear, calMonth;
+
+function calInitState(){
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+}
+
+function calPrevMonth(){
+  calMonth--;
+  if(calMonth < 0){ calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function calNextMonth(){
+  calMonth++;
+  if(calMonth > 11){ calMonth = 0; calYear++; }
+  renderCalendar();
+}
+
+function renderCalendar(){
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthLabel').textContent = monthNames[calMonth] + ' ' + calYear;
+
+  const byDay = {};
+  entries.forEach(e => { byDay[e.date] = (byDay[e.date] || 0) + e.amount; });
+
+  const firstDay = new Date(calYear, calMonth, 1);
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  let startWeekday = firstDay.getDay(); // 0 = Sun
+  startWeekday = (startWeekday === 0) ? 6 : startWeekday - 1; // convert to Mon-start
+
+  const todayIso = new Date().toISOString().slice(0,10);
+
+  const grid = document.getElementById('calGrid');
+  const dowLabels = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  let html = dowLabels.map(d => `<div class="calDow">${d}</div>`).join('');
+
+  for(let i=0;i<startWeekday;i++){
+    html += '<div class="calCell blank"></div>';
+  }
+
+  for(let day=1; day<=daysInMonth; day++){
+    const iso = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+    const amt = byDay[iso];
+    const hasEarning = amt !== undefined;
+    const isToday = iso === todayIso;
+    html += `
+      <div class="calCell ${hasEarning ? 'hasEarning' : ''} ${isToday ? 'today' : ''}">
+        <span class="calDayNum">${day}</span>
+        ${hasEarning ? `<span class="calAmount">£${amt.toFixed(0)}</span>` : ''}
+      </div>
+    `;
+  }
+
+  grid.innerHTML = html;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function downloadDashboard(){
+  const card = document.getElementById('dashboardCard');
+  html2canvas(card, {scale:2, backgroundColor:'#fffdf8'}).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `fabgarden-earnings-${new Date().toISOString().slice(0,10)}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('Chart downloaded');
+  }).catch(()=> showToast('Download error'));
+}
+
+loadData();
+calInitState();
+renderAll();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
