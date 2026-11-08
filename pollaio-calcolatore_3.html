@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pollaio in Sicilia — Calcolatore di redditività</title>
+<meta name="theme-color" content="#A6432E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pollaio Sicilia">
+<link rel="apple-touch-icon" href="pollaio-icon.png?v=1">
+<link rel="manifest" href="pollaio.webmanifest?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -249,6 +255,7 @@
     <div class="metric">
       <p class="metric-label">Uova al mese</p>
       <p class="metric-value" id="out-eggs">3520</p>
+      <p style="font-size:13px; color:var(--terra); font-weight:600; margin:4px 0 0;" id="out-boxes">587 confezioni da 6</p>
     </div>
     <div class="metric highlight">
       <p class="metric-label">Profitto netto/mese</p>
@@ -413,6 +420,7 @@ function calc() {
 
   document.getElementById('out-hens').textContent = fmt(hens);
   document.getElementById('out-eggs').textContent = fmt(monthlyEggs);
+  document.getElementById('out-boxes').textContent = fmt(Math.ceil(monthlyEggs / 6)) + ' confezioni da 6';
   document.getElementById('out-profit').textContent = fmtE(profit);
   document.getElementById('out-annual').textContent = fmtE(profit * 12);
 
