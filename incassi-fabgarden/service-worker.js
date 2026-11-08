@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fabgarden-incassi-v2';
+const CACHE_NAME = 'fabgarden-incassi-v3';
 const APP_FILES = [
   './',
   './index.html',
